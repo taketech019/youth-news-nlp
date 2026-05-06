@@ -1,0 +1,26 @@
+# 환경 변수
+.env
+
+# 대용량 데이터 (로컬 전용)
+news_list/
+news_main/
+preprocessed_data/
+output/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Claude / Superpowers
+.claude/
+docs/superpowers/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
