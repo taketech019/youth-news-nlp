@@ -11,9 +11,12 @@ _YEAR_PATTERN = re.compile(r"(?<!\d)(20[12]\d)(?!\d)")
 
 
 def extract_year(query: str) -> Optional[str]:
-    """쿼리 문자열에서 첫 번째 4자리 연도 반환. 없으면 None."""
-    m = _YEAR_PATTERN.search(query)
-    return m.group(1) if m else None
+    """쿼리 문자열에서 연도 추출. 연도가 정확히 1개일 때만 반환, 그 외엔 None.
+
+    2개 이상이면 연도 범위 질문(예: "2016~2025년")으로 판단해 필터 미적용.
+    """
+    matches = _YEAR_PATTERN.findall(query)
+    return matches[0] if len(matches) == 1 else None
 
 
 def extract_newspaper(selected: list[str]) -> Optional[str]:

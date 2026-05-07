@@ -17,6 +17,10 @@ def test_extract_year_returns_none():
     assert extract_year("청년 주거 문제가 뭐야?") is None
 
 
+def test_extract_year_returns_none_for_range():
+    assert extract_year("2016년 ~ 2025년까지 변화 추이를 알려줘") is None
+
+
 def test_extract_newspaper_single():
     assert extract_newspaper(["동아일보"]) == "동아일보"
 

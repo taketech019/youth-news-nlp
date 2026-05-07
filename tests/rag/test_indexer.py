@@ -25,8 +25,8 @@ def test_load_documents_skips_null_text(tmp_path):
     assert len(docs) == 0
 
 
-def test_load_documents_kss_splits_sentences(mock_csv):
+def test_load_documents_splits_sentences(mock_csv):
     docs = load_documents(mock_csv)
-    # "청년 취업 현황" 기사는 3문장 → kss 분리 후 "\n" 2개 포함
+    # "청년 취업 현황" 기사는 3문장 → 문장 분리 후 "\n" 2개 포함
     target = next(d for d in docs if d.metadata["title"] == "청년 취업 현황")
     assert target.text.count("\n") == 2

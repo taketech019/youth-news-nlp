@@ -1,6 +1,6 @@
+import re
 import chromadb
 import pandas as pd
-import kss
 from llama_index.core import Document, VectorStoreIndex, StorageContext, Settings
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
@@ -10,12 +10,14 @@ from rag_chatbot.config import (
     CHROMA_DB_PATH, CHROMA_COLLECTION, EMBED_MODEL_NAME, DATA_FILES
 )
 
+_SENT_RE = re.compile(r'(?<=[.!?])\s+')
+
 
 def load_documents(data_files: dict | None = None) -> list[Document]:
-    """CSV에서 기사 로드 → kss 문장 분리 → LlamaIndex Document 목록 반환.
+    """CSV에서 기사 로드 → 문장 분리 → LlamaIndex Document 목록 반환.
 
     tokens 컬럼은 사용하지 않음. text_cleaned를 granite 임베딩 모델의
-    자체 토크나이저로 직접 처리하기 위해 kss로만 문장 경계를 표시한다.
+    자체 토크나이저로 직접 처리하기 위해 정규식으로만 문장 경계를 표시한다.
     """
     if data_files is None:
         data_files = DATA_FILES
@@ -26,7 +28,7 @@ def load_documents(data_files: dict | None = None) -> list[Document]:
         for _, row in df.iterrows():
             if not isinstance(row.get("text_cleaned"), str):
                 continue
-            sentences = kss.split_sentences(row["text_cleaned"])
+            sentences = _SENT_RE.split(row["text_cleaned"].strip()) or [row["text_cleaned"]]
             text = "\n".join(sentences)
             docs.append(Document(
                 text=text,

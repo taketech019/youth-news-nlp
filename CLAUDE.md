@@ -17,8 +17,8 @@ pytest tests/rag/test_retriever.py
 # Run a single test
 pytest tests/rag/test_retriever.py::test_extract_year_with_marker -v
 
-# Start the chatbot UI
-streamlit run rag_chatbot/app.py
+# Start the chatbot UI (python -m required so rag_chatbot package is on sys.path)
+python -m streamlit run rag_chatbot/app.py
 
 # Build the vector index manually (first run: tens of minutes)
 python -c "from rag_chatbot.indexer import load_or_build_index; load_or_build_index()"
@@ -53,9 +53,9 @@ config.py → indexer.py → retriever.py → app.py
 
 **`indexer.py`** — Two-stage index lifecycle:
 1. `load_or_build_index()` checks `collection.count() > 0` to decide load vs. build
-2. Build path: CSV → kss sentence splitting → `"\n".join()` → `Document` → `SentenceSplitter(chunk_size=512, overlap=20)` → ChromaDB via LlamaIndex
+2. Build path: CSV → regex sentence splitting (`(?<=[.!?])\s+`) → `"\n".join()` → `Document` → `SentenceSplitter(chunk_size=512, overlap=20)` → ChromaDB via LlamaIndex
 
-The `tokens` column in the CSVs (Kiwi morphological analysis output) is intentionally unused. `text_cleaned` goes directly to the granite embedding model's own tokenizer; kss is only used to mark sentence boundaries.
+The `tokens` column in the CSVs (Kiwi morphological analysis output) is intentionally unused. `text_cleaned` goes directly to the granite embedding model's own tokenizer; regex is only used to mark sentence boundaries for the splitter.
 
 **`retriever.py`** — Per-query engine construction:
 - Year extracted via `(?<!\d)(20[12]\d)(?!\d)` — `\b` doesn't work here because Python's `re` treats Korean `년` as `\w`
@@ -66,7 +66,7 @@ The `tokens` column in the CSVs (Kiwi morphological analysis output) is intentio
 
 ### Test Suite (`tests/rag/`)
 
-Tests cover `config`, `indexer`, and `retriever` with no live LLM or real ChromaDB calls. The `mock_csv` fixture in `conftest.py` provides 3 rows × 3 newspapers = 9 documents. The kss test asserts exactly 2 `"\n"` characters in the 3-sentence "청년 취업 현황" article.
+Tests cover `config`, `indexer`, and `retriever` with no live LLM or real ChromaDB calls. The `mock_csv` fixture in `conftest.py` provides 3 rows × 3 newspapers = 9 documents. The sentence-split test asserts exactly 2 `"\n"` characters in the 3-sentence "청년 취업 현황" article.
 
 ### Analysis Notebooks (`01_crawl/`, `02_network_analysis/`)
 
